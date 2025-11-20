@@ -1,0 +1,73 @@
+doctrine:
+  dbal:
+    url: '%env(resolve:DATABASE_URL)%'
+
+  orm:
+    auto_generate_proxy_classes: true
+    naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+
+    auto_mapping: false
+
+    mappings:
+      Account:
+        type: attribute
+        is_bundle: false
+        dir: '%kernel.project_dir%/src/Account/Domain/Entity'
+        prefix: 'App\Account\Domain\Entity'
+        alias: Account
+
+      Auth:
+        type: attribute
+        is_bundle: false
+        dir: '%kernel.project_dir%/src/Auth/Domain/Entity'
+        prefix: 'App\Auth\Domain\Entity'
+        alias: Auth
+
+      Product:
+        type: attribute
+        is_bundle: false
+        dir: '%kernel.project_dir%/src/Product/Domain/Entity'
+        prefix: 'App\Product\Domain\Entity'
+        alias: Product
+
+      Cart:
+        type: attribute
+        is_bundle: false
+        dir: '%kernel.project_dir%/src/Cart/Domain/Entity'
+        prefix: 'App\Cart\Domain\Entity'
+        alias: Cart
+
+      Discount:
+        type: attribute
+        is_bundle: false
+        dir: '%kernel.project_dir%/src/Discount/Domain/Entity'
+        prefix: 'App\Discount\Domain\Entity'
+        alias: Discount
+
+      ApiUsage:
+        type: attribute
+        is_bundle: false
+        dir: '%kernel.project_dir%/src/ApiUsage/Domain/Entity'
+        prefix: 'App\ApiUsage\Domain\Entity'
+        alias: ApiUsage
+
+      Order:
+        type: attribute
+        is_bundle: false
+        dir: '%kernel.project_dir%/src/Order/Domain/Entity'
+        prefix: 'App\Order\Domain\Entity'
+        alias: Order
+
+      Payment:
+        type: attribute
+        is_bundle: false
+        dir: '%kernel.project_dir%/src/Payment/Domain/Entity'
+        prefix: 'App\Payment\Domain\Entity'
+        alias: Payment
+
+      Subscription:
+        type: attribute
+        is_bundle: false
+        dir: '%kernel.project_dir%/src/Subscription/Domain/Entity'
+        prefix: 'App\Subscription\Domain\Entity'
+        alias: Subscription

@@ -1,0 +1,100 @@
+name: CI Symfony API
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  tests:
+    name: Tests Symfony (PHP 8.3)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: app_test
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: password
+        options: >-
+          --health-cmd="pg_isready -U app"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_pgsql, redis, opcache, bcmath, zip
+          tools: composer:v2
+
+      - name: Valider composer.json
+        run: composer validate
+
+      - name: Cache Composer
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Installer les dépendances
+        run: composer install --prefer-dist --no-interaction --no-scripts
+
+      - name: Créer les fichiers .env
+        run: cp .env.test .env
+
+      - name: Générer les clés JWT
+        run: |
+          mkdir -p config/jwt
+          openssl genrsa -out config/jwt/private.pem 2048
+          openssl rsa -in config/jwt/private.pem -pubout -out config/jwt/public.pem
+          chmod 644 config/jwt/private.pem config/jwt/public.pem
+
+      - name: Configure PostgreSQL
+        run: |
+          CONTAINER_ID=$(docker ps -q -f "ancestor=postgres:16-alpine")
+          docker exec $CONTAINER_ID sh -c "echo 'max_connections = 200' >> /var/lib/postgresql/data/postgresql.conf"
+          docker exec $CONTAINER_ID sh -c "echo 'shared_buffers = 256MB' >> /var/lib/postgresql/data/postgresql.conf"
+          docker restart $CONTAINER_ID
+          sleep 10
+          echo "PostgreSQL restarted with max_connections=200"
+
+      - name: Wait for PostgreSQL and create DB
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U app && break
+            echo "Waiting for PostgreSQL..."
+            sleep 1
+          done
+          php bin/console doctrine:database:create --env=test --if-not-exists
+          php bin/console doctrine:schema:create --env=test
+
+      - name: Exécuter les tests
+        run: vendor/bin/phpunit
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phpunit-results
+          path: phpunit.xml

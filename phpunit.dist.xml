@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+    bootstrap="src/Shared/Tests/bootstrap.php"
+    colors="true"
+    failOnRisky="true"
+    failOnWarning="true">
+
+    <php>
+        <ini name="display_errors" value="1"/>
+        <ini name="error_reporting" value="-1"/>
+        <ini name="memory_limit" value="1G"/>
+
+        <env name="APP_ENV" value="test" force="true"/>
+        <env name="KERNEL_CLASS" value="App\Kernel"/>
+        <server name="SHELL_VERBOSITY" value="-1"/>
+
+        <env name="BOOTSTRAP_CLEAR_CACHE_ENV" value="test"/>
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[self]=0"/>
+        <env name="MAILER_DSN" value="null://null" force="true"/>
+    </php>
+
+    <testsuites>
+        <!-- Tests par type -->
+        <testsuite name="Unit">
+            <directory>src/*/Tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="Integration">
+            <directory>src/*/Tests/Integration</directory>
+        </testsuite>
+
+        <testsuite name="Functional">
+            <directory>src/*/Tests/Functional</directory>
+        </testsuite>
+
+        <testsuite name="Api">
+            <directory>src/*/Tests/Api</directory>
+        </testsuite>
+    </testsuites>
+
+    <source>
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+
+        <exclude>
+            <directory>src/*/Tests</directory>
+            <directory>src/Entity</directory>
+            <directory>src/*/Application/Dto</directory>
+            <directory>src/Shared/Tests/Support</directory>
+            <file>src/Kernel.php</file>
+        </exclude>
+    </source>
+</phpunit>

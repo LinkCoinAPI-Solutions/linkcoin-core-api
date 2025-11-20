@@ -1,0 +1,97 @@
+# config/services.yaml
+parameters:
+    app.mailer_from: '%env(MAILER_FROM)%'
+    app.mailer_to: '%env(MAILER_TO)%'
+    app.app_name: '%env(APP_NAME)%'
+    app.frontend_base_url: '%env(FRONTEND_BASE_URL)%'
+    app.frontend_login_url: '%env(FRONTEND_LOGIN_URL)%'
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    _instanceof:
+        App\Account\Application\Service\Contract\Updater\UserProfileUpdaterInterface:
+            tags: ['app.userprofile_updater']
+
+    # Autodécouverte des services
+    App\:
+        resource: '../src'
+        exclude:
+            - '../src/**/Tests'
+            - '../src/**/Tests/*'
+            - '../src/Shared/Tests/bootstrap.php'
+            - '../src/Kernel.php'
+
+    # Repositories 
+    App\Account\Domain\Repository\UserRepositoryInterface: '@App\Account\Infrastructure\Repository\UserRepository'
+    App\Account\Domain\Repository\PasswordResetTokenRepositoryInterface: '@App\Account\Infrastructure\Repository\PasswordResetTokenRepository'
+    App\Cart\Domain\Repository\CartRepositoryInterface: '@App\Cart\Infrastructure\Repository\CartRepository'
+    App\Cart\Domain\Repository\CartItemRepositoryInterface: '@App\Cart\Infrastructure\Repository\CartItemRepository'
+    App\Discount\Domain\Repository\DiscountRepositoryInterface: '@App\Discount\Infrastructure\Repository\DiscountRepository'
+    App\Product\Domain\Repository\ProductRepositoryInterface: '@App\Product\Infrastructure\Repository\ProductRepository'
+    App\Product\Domain\Repository\ProductFeatureRepositoryInterface: '@App\Product\Infrastructure\Repository\ProductFeatureRepository'
+    App\Subscription\Domain\Repository\SubscriptionPlanRepositoryInterface: '@App\Subscription\Infrastructure\Repository\SubscriptionPlanRepository'
+    App\Subscription\Domain\Repository\SubscriptionRepositoryInterface: '@App\Subscription\Infrastructure\Repository\SubscriptionRepository'
+    App\Auth\Domain\Repository\PasswordResetTokenRepositoryInterface: '@App\Auth\Infrastructure\Repository\PasswordResetTokenRepository'
+
+    # Services
+    App\Cart\Domain\Service\Contract\CartServiceInterface: '@App\Cart\Application\Service\CartService'
+    App\Cart\Domain\Service\Contract\CartItem\CartItemServiceInterface: '@App\Cart\Application\Service\CartItem\CartItemService'
+    App\Cart\Domain\Service\Contract\CartItem\CartItemValidatorInterface: '@App\Cart\Application\Service\CartItem\CartItemValidator'
+    App\Cart\Domain\Service\Contract\CartCacheManagerInterface: '@App\Cart\Infrastructure\Cache\CartCacheManager'
+    App\Product\Domain\Service\Contract\PriceFormatterServiceInterface: '@App\Product\Infrastructure\Service\PriceFormatterService'
+    App\Account\Domain\Service\Contract\UserProfileServiceInterface: '@App\Account\Application\Service\UserProfileService'
+    App\Discount\Domain\Service\Contract\DiscountApplierInterface: '@App\Discount\Application\Service\DiscountApplier'
+    App\Product\Domain\Service\Contract\ProductServiceInterface: '@App\Product\Application\Service\ProductService'
+    App\Subscription\Domain\Service\Contract\SubscriptionPlanServiceInterface: '@App\Subscription\Application'
+    App\Product\Domain\Service\Contract\ProductFeatureServiceInterface: '@App\Product\Application\Service\ProductFeatureService'
+    App\Subscription\Domain\Service\Contract\SubscriptionPlanCacheManagerInterface: '@App\Subscription\Infrastructure\Cache\SubscriptionPlanCacheManager'
+    App\Product\Domain\Service\Contract\ProductCacheManagerInterface: '@App\Product\Infrastructure\Cache\ProductCacheManager'
+
+
+    # Context
+    App\Shared\Infrastructure\Security\Contract\UserContextInterface: '@App\Shared\Infrastructure\Security\UserContext'
+
+    # Security
+    App\Shared\Security\Contract\AuthorizationCheckerInterface: '@App\Shared\Security\AuthorizationChecker'
+
+    # Mapper
+    App\Account\Application\Mapper\Contract\UserProfileMapperInterface: '@App\Account\Application\Mapper\UserProfileMapper'
+    App\Cart\Application\Mapper\Contract\CartItemMapperInterface: '@App\Cart\Application\Mapper\CartItemMapper'
+    App\Cart\Application\Mapper\Contract\CartMapperInterface: '@App\Cart\Application\Mapper\CartMapper'
+    App\Cart\Application\Mapper\Contract\ProductCartMapperInterface: '@App\Cart\Application\Mapper\ProductCartMapper'
+    App\Cart\Application\Mapper\SubscriptionPlanCartMapperInterface: '@App\Cart\Application\Mapper\SubscriptionPlanCartMapper'
+    App\Discount\Application\Mapper\Contract\DiscountMapperInterface: '@App\Discount\Application\Mapper\DiscountMapper'
+    App\Product\Application\Mapper\Contract\ProductMapperInterface: '@App\Product\Application\Mapper\ProductMapper'
+    App\Product\Application\Mapper\Contract\ProductFeatureMapperInterface: '@App\Product\Application\Mapper\ProductFeatureMapper'
+    App\Subscription\Application\Mapper\Contract\SubscriptionPlanMapperInterface: '@App\Subscription\Application\Mapper\SubscriptionPlanMapper'
+
+    # Factory 
+    App\Account\Application\Service\Factory\UserProfileFactory: ~
+
+    App\Account\Application\Service\UserProfileService:
+        arguments:
+            $updaters: !tagged_iterator app.userprofile_updater
+
+    # Event Subscribers
+    App\Cart\Infrastructure\EventSubscriber\CartCacheSubscriber:
+        tags: [doctrine.event_subscriber]
+
+    # Discount Strategies
+    App\Discount\Application\Service\DiscountApplier:
+        arguments:
+            $strategies: !tagged_iterator app.discount_strategy
+
+    App\Discount\Application\Service\Strategy\PercentageDiscountStrategy:
+        tags: [app.discount_strategy]
+
+    App\Discount\Application\Service\Strategy\FixedDiscountStrategy:
+        tags: [app.discount_strategy]
+
+    App\Discount\Application\Service\Strategy\NoDiscountStrategy:
+        tags: [app.discount_strategy]
+
+    # Cache
+    Symfony\Contracts\Cache\CacheInterface: '@cache.app'

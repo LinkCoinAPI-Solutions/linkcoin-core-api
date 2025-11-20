@@ -1,0 +1,42 @@
+{% extends '@Shared/emails/base_email.html.twig' %}
+
+{% block title %}Bienvenue chez {{ app_name }} - Confirmez votre email{% endblock %}
+
+{% block email_title %}
+    <span style="-webkit-background-clip: text; -webkit-text-fill-color: transparent;">Bienvenue</span> {{ first_name }} ! 🎉
+{% endblock %}
+
+{% block email_content %}
+    <p class="email-greeting">Ravi de vous accueillir dans la famille {{ app_name }} !</p>
+    
+    <div class="email-message">
+        <p><strong>Merci de vous être inscrit(e) !</strong> Vous êtes maintenant prêt(e) à découvrir nos API crypto de nouvelle génération.</p>
+        
+        <p>Pour commencer à utiliser votre compte et accéder à toutes nos fonctionnalités premium, il vous suffit de confirmer votre adresse email :</p>
+    </div>
+    
+    <div class="email-cta">
+        <a href="{{ confirmation_link }}" 
+           class="email-button" 
+           role="button" 
+           aria-label="Confirmer mon adresse email"
+           style="background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;">
+             Confirmer mon email
+        </a>
+    </div>
+    
+    <div class="email-message">
+        <p style="font-size: 16px; color: #64748b; background: #f1f5f9; padding: 20px; border-radius: 12px; border-left: 4px solid #3b82f6;">
+            <strong>💡 Conseil :</strong> Ajoutez notre adresse email à vos contacts pour être sûr(e) de recevoir toutes nos communications importantes.
+        </p>
+        
+        <p style="font-size: 15px; color: #64748b; margin-top: 30px;">
+            <strong>Lien de confirmation :</strong><br>
+            <a href="{{ confirmation_link }}" style="word-break: break-all; color: #3b82f6;">{{ confirmation_link }}</a>
+        </p>
+        
+        <p style="font-size: 14px; color: #94a3b8; margin-top: 25px;">
+            Si vous n'avez pas créé ce compte, vous pouvez ignorer cet email.
+        </p>
+    </div>
+{% endblock %}

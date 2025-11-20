@@ -1,0 +1,50 @@
+{% extends '@Shared/emails/base_email.html.twig' %}
+
+{% block title %}Email confirmé avec succès - {{ app_name|e }}{% endblock %}
+
+{% block email_title %}
+    🎉 Email confirmé !
+{% endblock %}
+
+{% block email_content %}
+    <p class="email-greeting">Félicitations {{ first_name|e }} !</p>
+    
+    <div class="email-message">
+        <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border: 1px solid #3b82f6; border-radius: 16px; padding: 30px; margin: 30px 0;">
+            <p style="margin: 0; color: #1d4ed8; font-size: 18px; font-weight: 600;">
+                ✨ <strong>Parfait :</strong> Votre adresse email a été confirmée avec succès !
+            </p>
+        </div>
+        
+        <p>Votre compte <strong>{{ app_name|e }}</strong> est maintenant entièrement activé et vous avez accès à toutes nos fonctionnalités.</p>
+        
+        <p>Vous pouvez dès maintenant :</p>
+        <ul style="color: #475569; padding-left: 20px; line-height: 1.8;">
+            <li>📊 Accéder à votre tableau de bord personnalisé</li>
+            <li>🔔 Recevoir nos notifications importantes</li>
+            <li>🚀 Profiter pleinement de l'expérience {{ app_name|e }}</li>
+        </ul>
+    </div>
+    
+    <div class="email-cta">
+        <a href="{{ login_url|e('html_attr') }}" 
+           class="email-button" 
+           role="button" 
+           aria-label="Accéder à mon compte"
+           style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;">
+            🎯 Accéder à mon compte
+        </a>
+    </div>
+    
+    <div class="email-message">
+        <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 12px; padding: 20px; margin: 30px 0;">
+            <p style="margin: 0; color: #0369a1; font-weight: 600;">
+                💡 <strong>Astuce :</strong> Ajoutez notre adresse email à vos contacts pour ne jamais manquer nos communications importantes !
+            </p>
+        </div>
+        
+        <p style="font-size: 16px; color: #475569;">
+            Bienvenue officiellement dans la communauté <strong>{{ app_name|e }}</strong> ! 🌟
+        </p>
+    </div>
+{% endblock %}

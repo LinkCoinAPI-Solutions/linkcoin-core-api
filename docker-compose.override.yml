@@ -1,0 +1,42 @@
+services:
+  php:
+    build:
+      dockerfile: docker/frankenphp/Dockerfile.dev
+    env_file:
+      - .env.dev
+    environment:
+      SERVER_NAME: ":8000"
+      APP_ENV: dev
+      APP_DEBUG: 1
+      XDEBUG_MODE: debug
+      XDEBUG_START_WITH_REQUEST: yes
+    volumes:
+      # - ./:/app:cached
+      # - ./docker/frankenphp/Caddyfile:/etc/frankenphp/Caddyfile:ro
+      - ./src:/app/src:cached
+      - ./tests:/app/tests:cached
+      - ./docker/frankenphp/Caddyfile:/etc/frankenphp/Caddyfile:ro
+      - symfony_vendor:/app/vendor:delegated
+      - symfony_var:/app/var:delegated
+      - caddy_data:/data/caddy
+      - caddy_config:/config/caddy
+    restart: "no"
+
+  postgres:
+    env_file:
+      - .env.dev
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  redis:
+    env_file:
+      - .env.dev
+
+volumes:
+  symfony_vendor:
+  caddy_data:
+  caddy_config:
+
+networks:
+  linkcoin:
+    driver: bridge

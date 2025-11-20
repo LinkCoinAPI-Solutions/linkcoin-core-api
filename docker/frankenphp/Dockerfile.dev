@@ -1,0 +1,58 @@
+FROM dunglas/frankenphp:php8.3
+
+# Installer les dépendances système nécessaires à PostgreSQL
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Installer les extensions PHP nécessaires
+RUN install-php-extensions \
+    pdo_pgsql \
+    pgsql \
+    intl \
+    opcache \
+    zip \
+    bcmath \
+    redis \
+    xdebug
+
+# Copier les configurations PHP personnalisées
+COPY docker/frankenphp/conf.d/php.ini /usr/local/etc/php/conf.d/zz-custom.ini
+COPY docker/frankenphp/conf.d/xdebug.ini /usr/local/etc/php/conf.d/zz-xdebug.ini
+
+# Installer Composer depuis l’image officielle
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Copier la configuration de Caddy
+COPY docker/frankenphp/Caddyfile /etc/frankenphp/Caddyfile
+
+# Définir le répertoire de travail
+WORKDIR /app
+
+# Copier les fichiers de dépendances Composer
+COPY composer.json composer.lock symfony.lock* ./
+
+# Installer les dépendances PHP
+RUN composer install --prefer-dist --no-interaction --no-scripts --optimize-autoloader
+
+# Copier le reste de l’application
+COPY . .
+
+# Exécuter les scripts post-installation de Composer (non bloquant)
+RUN composer run-script post-install-cmd || true
+
+# Créer les répertoires nécessaires et ajuster les permissions
+RUN mkdir -p /data/caddy /config/caddy var/cache var/log && \
+    chown -R www-data:www-data /app /data/caddy /config/caddy
+
+# Copier le script d'entrée
+COPY docker/frankenphp/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+USER www-data
+
+EXPOSE 8000
+
+# Définir le script d'entrée
+ENTRYPOINT ["/entrypoint.sh"]

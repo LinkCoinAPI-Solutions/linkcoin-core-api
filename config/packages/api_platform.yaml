@@ -1,0 +1,16 @@
+# config/packages/api_platform.yaml
+api_platform:
+    title: Hello API Platform
+    version: 1.0.0
+    defaults:
+        stateless: true
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']
+    
+    # Chemins explicites des ApiResource par module
+    mapping:
+        paths:
+            - '%kernel.project_dir%/src/Account/Api/ApiResource'
+            - '%kernel.project_dir%/src/Auth/Api/ApiResource'
+            - '%kernel.project_dir%/src/Cart/Api/ApiResource'
+            - '%kernel.project_dir%/src/Product/Api/ApiResource'

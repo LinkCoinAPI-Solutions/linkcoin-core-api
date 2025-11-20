@@ -1,0 +1,45 @@
+# config/packages/security.yaml
+security:
+    enable_authenticator_manager: true
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Account\Domain\Entity\User
+                property: username
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        
+        # PLUS SPÉCIFIQUE - Seulement pour le login
+        login:
+            pattern: ^/api/v1/auth/login$
+            stateless: true
+            provider: app_user_provider
+            json_login:
+                check_path: /api/v1/auth/login
+                username_path: username
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+        api:
+            pattern: ^/api
+            stateless: true
+            provider: app_user_provider
+            jwt: ~
+
+    access_control:
+        - { path: ^/api/v1/auth/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/v1/auth/register, roles: PUBLIC_ACCESS }
+        - { path: ^/api/v1/auth/password-reset, roles: PUBLIC_ACCESS }
+        - { path: ^/api/v1/auth/confirm-email, roles: PUBLIC_ACCESS }
+        - { path: ^/api/v1/auth/reset-password, roles: PUBLIC_ACCESS }
+        
+        - { path: ^/api/v1/auth/verify, roles: IS_AUTHENTICATED_FULLY }
+        
+        - { path: ^/api/v1, roles: IS_AUTHENTICATED_FULLY }
